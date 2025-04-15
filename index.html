@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="A novel framework for text-based realistic animatable 3DGS avatar generation with morphable model alignment.">
+  <meta name="keywords" content="3D portrait generation, 3DGS, diffusion models">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnimPortrait3D: Text-based Animatable 3D Avatars with Morphable Model Alignment</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/1f47b.png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <style>
+            .text-color-gradient {
+                display: inline-block;
+                font-size: 10em;
+                font-weight: 700;
+                background: linear-gradient(120deg, #a6c0fe 0%, #f68084 100%);
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+          .card {
+            background: #DFD3C3;
+            transition: 0.3s;
+            border-radius: 12px;
+            margin: 0px 5px 10px 5px;
+            padding:10px 20px 20px 20px
+            }
+
+            .container {
+              padding: -12px -16px;
+            }
+        </style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://onethousandwu.com">
+      <span class="icon">
+          <img src="static/images/me.png">
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://onethousandwu.com/portrait3d.github.io/">
+            Portrait3D
+          </a>
+            <a class="navbar-item" href="https://onethousandwu.com/3DPortraitGAN.github.io/">
+                3DPortraitGAN
+            </a>
+          <a class="navbar-item" href="https://onethousandwu.com/LPFF.github.io/">
+            LPFF
+          </a>
+          <a class="navbar-item" href="https://onethousandwu.com/HairMapper.github.io/">
+            HairMapper
+          </a>
+          <a class="navbar-item" href="https://onethousandwu.com/doublechinremoval.github.io/">
+            DoubleChin removal
+          </a>
+          
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <div class="text-color-gradient title is-1 publication-title"> <span class="dnerf">AnimPortrait3D</span>  </div>
+          <h1 class="title is-2 publication-title" >  Text-based Animatable 3D Avatars <br /> with Morphable Model Alignment  </h1>
+          <div class="is-size-3 publication-conf">
+
+            <span><b>ACM SIGGRAPH 2025 (Conference Track)</b></span>
+            </div>
+
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://onethousandwu.com/">Yiqian Wu</a><sup>1,2</sup>,</span>
+            <span class="author-block">
+              <a href="https://malteprinzler.github.io/">Malte Prinzler</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="http://www.cad.zju.edu.cn/home/jin/">Xiaogang Jin</a><sup>2</sup>,
+            </span> 
+            <span class="author-block">
+              <a href="https://inf.ethz.ch/people/person-detail.MjYyNzgw.TGlzdC8zMDQsLTg3NDc3NjI0MQ==.html">Siyu Tang</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>ETH Zürich,</span>
+            <span class="author-block"><sup>2</sup>State Key Lab of CAD&CG, Zhejiang University</span> 
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+             <span class="link-block"> 
+               <a href=" "
+                  class="external-link button is-normal is-rounded is-dark">
+                 <span class="icon">
+                     <i class="fas fa-file-pdf"></i>
+                 </span>
+                 <span>Paper (ACM Digital Library)</span>
+               </a>
+           </span> 
+
+              <span class="link-block">
+                <a href=" "
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>ArXiv</span>
+                </a>
+              </span>
+
+              <span class="link-block">
+                <a href="https://drive.google.com/file/d/1bt67uAtJyfh8ZAUw7fl7QvA0B5oyWZWe"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Supp</span>
+                </a>
+              </span>
+
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://youtu.be/SMBjCejsvJI"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/oneThousand1000/AnimPortrait3D"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+              <!-- Dataset Link. -->
+              <span class="link-block">
+                <a href="https://huggingface.co/datasets/onethousand/AnimPortrait3D_gallery"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Results</span>
+                  </a>
+                </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+
+    <!-- <div class="container is-4">
+    <div class="hero-body">
+       <img src="./static/images/teaser.jpg" alt="Pipeline">
+      <h2 class="subtitle has-text-centered">
+      </h2>
+    </div>
+  </div> -->
+
+  <div class="container is-4">
+    <div class="hero-body">
+      <video id="teaser" autoplay muted loop playsinline height="80%">
+        <source src="./static/videos/teaser.mp4"
+                type="video/mp4">
+      </video>
+
+      <h2 class="subtitle has-text-centered">
+        AnimPortrait3D creates animatable 3D avatars from text descriptions, achieving realistic appearance and geometry while maintaining accurate alignment with the underlying parametric mesh. Prompt: <i>"A 40-year-old gentleman with a chiseled jawline, slightly graying hair slicked back into a neat undercut, dressed in a navy pinstriped suit, a red tie complementing his fair complexion - confidently walking through a bustling city street".</i>
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+
+         <div class="item-054_Z8MB8OuwqmA_0-video">
+          <video poster="" id="054_Z8MB8OuwqmA_0-video" autoplay controls muted loop playsinline height="60%">
+            <source src="./static/videos/054.mp4"
+                    type="video/mp4">
+          </video>
+           <div class="card">
+           <h2 class="subtitle has-text-justified">
+            Woman, bold, bright colours, rainbow Mohawk haircut, cyberpunk, wearing jacket, handsome, metallic necklace, realistic, soft lighting, professional Photography.
+          </h2>
+           </div>
+        </div>
+
+        <div class="item-331-video">
+          <video poster="" id="331-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/331.mp4"
+                    type="video/mp4">
+          </video>
+          <div class="card">
+            <h2 class="subtitle has-text-justified">
+              A handsome young brown lightly wavy Pompadour with fade, muscled sportsman in navy satin large pinstripe double-breasted suit, club tie, pompadour haircut
+            </h2>
+          </div>
+        </div>
+
+        <div class="item-044-video">
+          <video poster="" id="044-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/044.mp4"
+                    type="video/mp4">
+          </video>
+          <div class="card">
+          <h2 class="subtitle has-text-justified">
+             Woman, white hair and black skin, portrait, Off-shoulder top and wide-leg pants for a rooftop bar night, (high detailed skin:1.2)
+          </h2>
+          </div>
+        </div>
+
+        <div class="item-445-video">
+          <video poster="" id="445-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/445.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+               A Teen boy, pensive look, dark hair. Preppy sweater, collared shirt, moody room, 80s memorabilia
+            </h2>
+          </div>
+        </div>
+
+
+        <div class="item-476-video">
+          <video poster="" id="476-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/476.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              A sophisticated, silver-haired Caucasian woman in her 60s, with a heart-shaped face, styled in a perfectly coiffed bouffant hairstyle, dressed in a tailored tweed suit, pearl necklace, and carrying a classic leather handbag, strolling through an art gallery, admiring vibrant abstract paintings
+            </h2>
+          </div>
+        </div>
+
+
+
+        <div class="item-472-video">
+          <video poster="" id="472-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/472.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              The middle-aged Hispanic man had a strong jawline, bushy black mustache, and a receding hairline. He wore a fitted navy blue suit with a crisp white shirt, and a gold watch shone on his wrist as he confidently stood in a bustling city street
+            </h2>
+          </div>
+        </div>
+        
+
+
+
+        <div class="item-541-video">
+          <video poster="" id="541-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/541.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              A graceful merfolk with scales that glimmer in hues of aquamarine and gold, waering Flowing garments made of shimmering seaweed or kelp, flowing teal hair, and webbed fingers tipped with pearlescent claws
+            </h2>
+          </div>
+        </div>
+        
+        
+        <div class="item-481-video">
+          <video poster="" id="481-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/481.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              With a salt and pepper mustache, the 62-year-old African American man had an oval-shaped face, wore a plaid button-up shirt, and rested his hands on his cane as he walked along the beach at sunset
+            </h2>
+          </div>
+        </div>
+        
+
+        <div class="item-537-video">
+          <video poster="" id="537-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/537.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              A two-year-old African American girl with chubby cheeks and a round face, has short, curly hair, wears a pink ruffled dress with a small necklace bearing her name, and is seen giggling in a sunlit garden
+            </h2>
+          </div>
+        </div>
+
+        <div class="item-434-video">
+          <video poster="" id="434-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/434.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+               A weathered 70 year old man with a long gray beard, on a boat in calm water on the louisiana bayou on a hot summer night, t-shirt and overalls
+            </h2>
+          </div>
+        </div>
+
+        <div class="item-513-video">
+          <video poster="" id="513-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/513.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              A vivacious 41-year-old Middle Eastern woman with an olive complexion and captivating black-brown eyes. Her shoulder-length jet-black hair is styled in loose curls, adding volume. She wears a patterned silk tunic, paired with dangling silver earrings, confidently navigating a bustling bazaar
+            </h2>
+          </div>
+        </div>
+
+        <div class="item-461-video">
+          <video poster="" id="461-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/461.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              An eight-year-old Latina girl with a warm, oval face and almond-shaped eyes, her dark brown hair in a short sleek ponytail, dons a white blouse with lace trimmings; she gazes curiously at the aquarium fish, her silver locket glinting in the light
+            </h2>
+          </div>
+        </div>
+
+        <div class="item-303-video">
+          <video poster="" id="303-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/303.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+               A gorgeous 1950s americana vintage portrait of a boy, eyeshadow,  wearing 1950s americana shirt with a maroon striped sweater vest and (skin-tight purple navy high-waisted   bell-bottom pants with a wide belt)), serious expression, subsurface scattering
+            </h2>
+          </div>
+        </div>
+
+
+        <div class="item-501-video">
+          <video poster="" id="501-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/501.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+               A woman, long blonde hair styled in a 1950s-inspired look, and is dressed in a pink checkered dress with a white apron, wears pearls around her neck, a retro, pastel-themed kitchen with a whimsical and vintage aesthetic
+            </h2>
+          </div>
+        </div>
+
+        <div class="item-483-video">
+          <video poster="" id="483-video" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/483.mp4"
+                    type="video/mp4">
+          </video>
+         <div class="card">
+            <h2 class="subtitle has-text-justified">
+              Dressed in a casual and laid-back manner, a 24-year-old Hispanic young man radiates confidence with his athletic build, tousled dark hair,  wearing a plain black t-shirt, ripped jeans, and a worn-out leather jacket, embodying effortless coolness in a vibrant city
+            </h2>
+          </div>
+        </div>
+     
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            The generation of high-quality, animatable 3D head avatars from text has enormous potential in content creation applications such as games, movies, and embodied virtual assistants. Current text-to-3D generation methods typically combine parametric head models with 2D diffusion models using score distillation sampling to produce 3D-consistent results. However, they struggle to synthesize realistic details and suffer from misalignments between the appearance and the driving parametric model, resulting in unnatural animation results. We discovered that these limitations stem from ambiguities in the 2D diffusion predictions during 3D avatar distillation, specifically: (i) the avatar's appearance and geometry is underconstrained by the text input, and (ii) the semantic alignment between the predictions and the parametric head model is insufficient because the diffusion model is unaware of the parametric model. 
+          </p>
+          <p> 
+            In this work, we propose a novel framework, <span class="dnerf">AnimPortrait3D</span>, for text-based realistic animatable 3DGS avatar generation with morphable model alignment, and introduce two key strategies to address these challenges. First, we tackle appearance and geometry ambiguities by utilizing prior information from a pretrained text-to-3D model to initialize a 3D avatar with robust appearance, geometry, and rigging relationships to the morphable model. Second, we refine the initial 3D avatar for dynamic expressions using a ControlNet that is conditioned on semantic and normal maps of the morphable model to ensure accurate alignment. As a result, our method outperforms existing approaches in terms of synthesis quality, alignment, and animation fidelity. Our experiments show that the proposed method advances the state of the art in text-based, animatable 3D head avatar generation.
+          </p> 
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+
+    <!-- Paper video. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/SMBjCejsvJI?rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+
+
+    <!-- Pipeline. -->
+
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Pipeline</h2>
+        <div class="content has-text-justified">
+          <p> 
+            Overview of <span class="dnerf">AnimPortrait3D</span>. Given an input text, the 3D Avatar Initialization stage generates a well-defined initial avatar that provides appearance and geometry prior information, and is rigged to SMPL-X for animation. During the Dynamic Optimization stage,  we optimize the avatar for dynamic poses and expressions using a 2D diffusion model.  We first pre-train the eye and mouth regions, then optimize the full avatar and apply a final refinement strategy to produce the final result.  <span class="dnerf">AnimPortrait3D</span> is able to generate avatars with diverse appearances, ethnicities, and ages.
+          </p>
+          <figure class="image">
+            <img src="./static/images/pipeline.png" alt="Pipeline">
+          </figure>
+        </div>
+      </div>
+</div>
+
+
+    <!--/ Pipeline. -->
+
+       <!-- Comparison. -->
+
+    <!-- <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Comparison</h2>
+        <div class="content has-text-justified">
+          <p>
+            Qualitative comparison to SOTA text-to-3D approaches: <a href="https://dreamfusion3d.github.io/">DreamFusion</a>,  <a href="https://github.com/luciddreamer-cvlab/LucidDreamer">LucidDreamer</a>,
+            <a href="https://github.com/TingtingLiao/TADA">TADA</a>, <a href="https://github.com/songrise/AvatarCraft">AvatarCraft</a>, <a href="https://github.com/magic-research/avatarstudio">AvatarStudio</a>, <a href="https://github.com/alvinliu0/HumanGaussian">HumanGaussian</a>, <a href="https://github.com/bytedance/AvatarVerse">AvatarVerse</a>, <a href="https://github.com/xhuangcv/humannorm">HumanNorm</a>,
+            <a href="https://seeavatar3d.github.io/">SEEAvatar</a>, <a href="https://github.com/HaoZhang990127/TECA">TECA</a>, and our method. The input prompt is presented at the top.
+          </p>
+          <figure class="image">
+            <img src="./static/images/Comparison.png" alt="Comparison">
+          </figure>
+        </div>
+
+        <div class="content has-text-justified">
+          <p>
+            Qualitative comparison to SOTA diffusion-based reconstruction approaches: <a href="https://github.com/One-2-3-45/One-2-3-45">One-2-3-45</a>,
+            <a href="https://github.com/dreamgaussian/dreamgaussian">DreamGaussian</a>, <a href="https://github.com/xxlong0/Wonder3D">Wonder3D</a>, <a href="https://github.com/liuyuan-pal/SyncDreamer">SyncDreamer</a> and <a href="https://github.com/huangyangyi/TeCH">TeCH</a>, and our method. The reference prompt
+            is presented at the top, and the reference image (which is also the generated image
+            used for image inversion in our framework) is presented at the left.
+          </p>
+          <figure class="image">
+            <img src="./static/images/comparison_reconstruct.png" alt="comparison_reconstruct">
+          </figure>
+        </div>
+
+
+      </div>
+      </div> -->
+
+
+  </div>
+
+  <!-- Comparison. -->
+
+    <!-- Results Gallery. -->
+
+    <div class="columns is-centered">
+      <div class="column is-5">
+        <h2 class="title is-3">Comparison</h2>
+        <div class="content has-text-justified">
+          <p>
+              Qualitative comparison to SOTA text-to-3D approaches: 
+              
+              
+              <a href="https://zhenglinzhou.github.io/HeadStudio-ProjectPage/">HeadStudio</a>, <a href="https://github.com/TingtingLiao/TADA">TADA</a>, <a href="https://github.com/alvinliu0/HumanGaussian">HumanGaussian</a>, <a href="https://ustc3dv.github.io/PortraitGen/">PortraitGen</a>, <a href="https://xg-chu.site/project_gpavatar/">GPAvatar</a>, <a href="https://xg-chu.site/project_gagavatar/">GAGAvatar</a>, and our method. While other methods take a text prompt as input (shown at the top), GPAvatar and GAGAvatar use an image as input. The reference images are sourced from the video data in the <a href="https://liangbinxie.github.io/projects/vfhq/">VFHQ</a> dataset.
+            </p>
+            <video poster="" id="interactive-video" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comparison.mp4"
+                      type="video/mp4">
+            </video>
+        </div>
+      </div>
+
+
+
+    </div>
+
+
+    <div class="columns is-centered">
+      <div class="column is-5">
+        <h2 class="title is-3">Resources</h2>
+
+
+        <h3 class="title is-4">Gallery of Results</h3>
+        <div class="content has-text-justified">
+          <p>
+            We provide a gallery of results generated by <span class="dnerf">AnimPortrait3D</span> on a diverse set of text prompts. Each result is accompanied by the input text prompt and the generated animatable 3D avatar. The preview image and the results can be found at <a href="https://huggingface.co/datasets/onethousand/AnimPortrait3D_gallery">huggingface</a>.
+            </p>
+            <figure class="image">
+              <img src="./static/images/gallery.png" alt="Comparison">
+            </figure>
+        </div>
+
+
+        <h3 class="title is-4">Pre-trained ControlNet</h3>
+        <div class="content has-text-justified">
+          <p>
+            This ControlNet can generate high-quality RGB images for facial, mouth, and eye regions, leveraging their respective conditional inputs (text, normal map and segmentation map). The pre-trained model can be found at <a href="https://huggingface.co/onethousand/AnimPortrait3D_controlnet">huggingface</a>.
+            </p>
+            <figure class="image">
+              <img src="./static/images/controlnet.png" alt="Comparison">
+            </figure>
+        </div>
+        
+
+        <h3 class="title is-4">Reconstructed Face Motions for Animation</h3>
+        <div class="content has-text-justified">
+          <p>
+            We provide some motion sequences reconstructed from <a href="https://liangbinxie.github.io/projects/vfhq/">VFHQ</a> dataset using <a href="https://github.com/ShenhanQian/VHAP">VHAP</a>, please refer to <a href="https://drive.google.com/file/d/1ZVQNUn8Kprlu9JviONSGMyrno7N2Ucdn/view?usp=drive_link">google drive</a> for download.
+            </p> 
+        </div>
+
+
+        <h3 class="title is-4">Interactive Rendering</h3>
+        <div class="content has-text-justified">
+          <p>
+            We provide an interactive user interface for animating our generated avatars using motion sequences or custom parameters, with real-time visualization of the underlying mesh. For more details, please visit our <a href="https://github.com/oneThousand1000/AnimPortrait3D">github repo</a>.
+            </p> 
+
+            <video poster="" id="interactive-video" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/interactive.mp4"
+                      type="video/mp4">
+            </video>
+        </div>
+
+
+      </div>
+    </div>
+
+ 
+  
+
+
+</section>
+
+
+ 
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered">
+
+
+
+    <!-- Concurrent Work. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Related Links</h2>
+
+        <div class="content has-text-justified">
+          <p>
+          <a href="https://onethousandwu.com/portrait3d.github.io/">Portrait3D</a> is a novel neural rendering-based framework with a novel joint geometry-appearance prior to achieve high-quality 3D static portrait generation from text input.
+          We use Portrait3D to provide the initial 3D avatar for AnimPortrait3D.</p>
+
+          <p>What's is new compared to Portrait3D?
+            <ol>
+          <li>Higher quality appearance. </li>
+          <li>More realistic geometry. </li>
+            <li>Capabilities for dynamic expressions. </li></ol></p>
+        </div>
+      </div>
+    </div>
+    <!--/ Concurrent Work. -->
+
+   </div>
+  </div>
+
+
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    If you find this project helpful to your research, please consider citing:
+    <pre><code>@article{AnimPortrait3D_sig25,
+      author = {Wu, Yiqian and Prinzler, Malte and Jin, Xiaogang and Tang, Siyun},
+      title = {Text-based Animatable 3D Avatars with Morphable Model Alignment},
+      year = {2025}, 
+      isbn = {},
+      publisher = {Association for Computing Machinery},
+      address = {New York, NY, USA},
+      url = {},
+      doi = {},
+      articleno = {},
+      numpages = {},
+      location = {Vancouver, BC, Canada},
+      series = {SIGGRAPH '25}
+}
+</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+           This page is borrowed from <a href="https://github.com/nerfies/nerfies.github.io">the Nerfies website</a>. We thank the authors for sharing it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
